@@ -3,19 +3,22 @@ const worker = new Worker('src/worker.js');
 const term = new Terminal({
   cursorBlink: true,
   logLevel: 'off',
-  theme: { background: '#222' },
 });
+const fitAddon = new FitAddon.FitAddon();
+term.loadAddon(fitAddon);
 term.open(document.querySelector('#terminal'));
-term.resize(100, 25);
+fitAddon.fit();
+window.addEventListener('resize', () => {
+  fitAddon.fit();
+});
+
 term.write('Preparing your online GDB session...\r\n');
 
 if (window.opener) {
   const pipe = new MessageChannel();
 
   worker.postMessage({ type: 'init', data: pipe.port1 }, [pipe.port1]);
-  window.opener.postMessage({ type: 'gdbInit', data: pipe.port2 }, '*', [
-    pipe.port2,
-  ]);
+  window.opener.postMessage({ type: 'gdbInit', data: pipe.port2 }, '*', [pipe.port2]);
 }
 
 term.onData((data) => {

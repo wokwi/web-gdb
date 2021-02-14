@@ -1,11 +1,16 @@
+* {
+  box-sizing: border-box;
+}
+
 html,
 body {
   margin: 0;
   padding: 0;
+  height: 100%;
 }
 
 body {
-  background-color: black;
+  background: black;
   display: flex;
   flex-direction: column;
   color: #ccc;
@@ -13,7 +18,7 @@ body {
 }
 
 header {
-  background: #1a1a1a;
+  background: #333;
   color: white;
   font-weight: 600;
   padding: 8px;
@@ -21,16 +26,17 @@ header {
 
 header h1 {
   margin: 0;
-  font-size: 18px
+  font-size: 18px;
 }
 
 main {
+  flex: 1;
   text-align: center;
-  margin-top: 8px;
+  padding: 8px 0 0 8px;
 }
 
 #terminal {
   display: inline-block;
-  max-width: 100%;
-  box-shadow: 2px 2px 8px rgba(255, 255, 255, 0.3);
+  height: 100%;
+  width: 100%;
 }
