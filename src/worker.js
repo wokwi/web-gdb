@@ -14,13 +14,30 @@ const emulator = new V86Starter({
 });
 
 let gdbPort = null;
+let elf = null;
 
 let ready = false;
 let slashFound = false;
 let bootMessage = false;
 
+function requestElf() {
+  if (gdbPort && !elf) {
+    gdbPort.postMessage({ type: 'downloadElf' });
+  }
+}
+
+function loadElf() {
+  if (elf) {
+    const data = Uint8Array.from(atob(elf), (c) => c.charCodeAt(0));
+    emulator.create_file('/sketch.elf', data);
+  } else {
+    requestElf();
+  }
+}
+
 emulator.add_listener('emulator-ready', () => {
   self.postMessage({ type: 'progress', data: '✅  System image loaded' });
+  requestElf();
 });
 
 emulator.add_listener('serial0-output-char', (chr) => {
@@ -29,13 +46,13 @@ emulator.add_listener('serial0-output-char', (chr) => {
     bootMessage = true;
   }
   if (chr === '/' && !ready) {
-    emulator.create_file('/sketch.elf', new Uint8Array([]));
+    loadElf();
     if (slashFound) {
       ready = true;
       for (const char of '\r\n') {
         self.postMessage({ type: 'serial', data: char });
       }
-      emulator.serial0_send('gdb -ex "target remote /dev/ttyS1"\n');
+      emulator.serial0_send('gdb -ex "symbol-file /mnt/sketch.elf" -ex "target remote /dev/ttyS1"\n');
     }
     slashFound = true;
   }
@@ -51,8 +68,14 @@ onmessage = (e) => {
     gdbPort = msg.data;
     gdbPort.onmessage = (e) => {
       const msg = e.data;
-      if (msg.type === 'gdb') {
-        serial1Write(msg.data);
+      switch (msg.type) {
+        case 'gdb':
+          serial1Write(msg.data);
+          break;
+        case 'elf':
+          elf = msg.data;
+          loadElf();
+          break;
       }
     };
   }
@@ -75,7 +98,7 @@ emulator.add_listener('serial1-output-char', function (chr) {
   }
 
   // Handle break
-  if (chr === '\003') {
+  if (gdbPort && chr === '\003') {
     console.log('BREAK');
     gdbPort.postMessage({ type: 'break' });
     return;
