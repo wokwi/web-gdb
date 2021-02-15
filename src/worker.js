@@ -4,6 +4,14 @@ importScripts('../build/libv86.js');
 
 console.log('Worker starting...');
 
+const gdb_sh = `
+#!/bin/sh
+while true; do
+  eval \`resize\`
+  gdb -ex "dir /mnt" -ex "symbol-file /mnt/sketch.elf" -ex "target remote /dev/ttyS1"
+done
+`;
+
 class GDBServer {
   constructor(messagePort) {
     this.messagePort = messagePort;
@@ -98,7 +106,7 @@ class GDBRunner {
 
   async init() {
     const { settings } = this;
-    this.cache = typeof caches !== 'undefined' ? await caches.open('gdb-state-v1') : null;
+    this.cache = typeof caches !== 'undefined' ? await caches.open('gdb-state-v2') : null;
     this.cachedData = this.cache ? await this.cache.match(imageName) : null;
     if (this.cachedData) {
       this.reportProgress('✅  System loaded from cache');
@@ -145,9 +153,7 @@ class GDBRunner {
   }
 
   startGDB() {
-    this.emulator.serial0_send(
-      'gdb -ex "dir /mnt" -ex "symbol-file /mnt/sketch.elf" -ex "target remote /dev/ttyS1"\n'
-    );
+    this.emulator.serial0_send('. /mnt/gdb.sh\n');
   }
 
   input(chars) {
@@ -167,7 +173,9 @@ class GDBRunner {
     this.cacheSaved = true;
     await this.cache.put(
       imageName,
-      new Response(frozenState, { headers: { 'Content-type': 'application/binary' } })
+      new Response(frozenState, {
+        headers: { 'Content-type': 'application/binary' },
+      })
     );
     console.log('emulator: state saved to cache.');
   }
@@ -187,6 +195,7 @@ class GDBRunner {
       );
     }
     this.emulator.run();
+    this.emulator.create_file('gdb.sh', new TextEncoder().encode(gdb_sh));
   };
 
   onEmulatorReady = () => {

@@ -1,4 +1,4 @@
-const worker = new Worker('src/worker.js?v=4');
+const worker = new Worker('src/worker.js?v=5');
 
 const term = new Terminal({
   cursorBlink: true,
