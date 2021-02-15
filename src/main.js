@@ -1,4 +1,4 @@
-const worker = new Worker('src/worker.js');
+const worker = new Worker('src/worker.js?v=4');
 
 const term = new Terminal({
   cursorBlink: true,
@@ -14,10 +14,9 @@ window.addEventListener('resize', () => {
 
 term.write('Preparing your online GDB session...\r\n');
 
+const pipe = new MessageChannel();
+worker.postMessage({ type: 'init', data: pipe.port1 }, [pipe.port1]);
 if (window.opener) {
-  const pipe = new MessageChannel();
-
-  worker.postMessage({ type: 'init', data: pipe.port1 }, [pipe.port1]);
   window.opener.postMessage({ type: 'gdbInit', data: pipe.port2 }, '*', [pipe.port2]);
 }
 
