@@ -5,7 +5,7 @@ console.log('Worker starting...');
 const emulator = new V86Starter({
   wasm_path: '../build/v86.wasm',
   bios: { url: '../bios/seabios.bin' },
-  bzimage: { url: '../images/gdb-7.11.1-bzImage.bin' },
+  bzimage: { url: '../images/gdb-10.1-bzImage.bin' },
   cmdline: 'tsc=reliable mitigations=off random.trust_cpu=on',
   autostart: true,
   disable_speaker: true,
