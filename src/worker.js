@@ -62,8 +62,8 @@ class GDBServer {
     this.gdbBuf += chr;
     for (;;) {
       const dolla = this.gdbBuf.indexOf('$');
-      const hash = this.gdbBuf.indexOf('#');
-      if (dolla < 0 || hash < 0 || hash < dolla || hash + 2 > this.gdbBuf.length) {
+      const hash = this.gdbBuf.indexOf('#', dolla + 1);
+      if (dolla < 0 || hash < 0 || hash + 2 > this.gdbBuf.length) {
         return;
       }
       const cmd = this.gdbBuf.substr(dolla + 1, hash - dolla - 1);
