@@ -1,4 +1,4 @@
-const imageName = 'gdb-10.1-bzImage.bin';
+const imageName = 'gdb-multiarch-10.1-bzImage.bin';
 
 importScripts('../build/libv86.js');
 
@@ -8,7 +8,7 @@ const gdb_sh = `
 #!/bin/sh
 while true; do
   eval \`resize\`
-  gdb -ex "dir /mnt" -ex "symbol-file /mnt/sketch.elf" -ex "target remote /dev/ttyS1"
+  gdb -ex "dir /mnt" -ex "file /mnt/sketch.elf" -ex "target remote /dev/ttyS1"
 done
 `;
 
