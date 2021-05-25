@@ -129,7 +129,11 @@ class GDBRunner {
   loadElf() {
     const { gdbServer, emulator } = this;
     const { elf, sources } = this.gdbServer;
-    if (elf) {
+    if (!elf && gdbServer) {
+      gdbServer.requestElf();
+      return;
+    }
+    if (elf && this.ready) {
       const data = Uint8Array.from(atob(elf), (c) => c.charCodeAt(0));
       emulator.create_file('/sketch.elf', data);
       if (sources) {
@@ -139,8 +143,6 @@ class GDBRunner {
           emulator.create_file(filename, new TextEncoder().encode(content));
         }
       }
-    } else if (gdbServer) {
-      gdbServer.requestElf();
     }
   }
 
@@ -211,7 +213,6 @@ class GDBRunner {
       this.bootMessageDisplayed = true;
     }
     if (chr === '/' && !this.ready) {
-      this.loadElf();
       if (this.slashFound) {
         this.cacheState();
         this.ready = true;
@@ -220,6 +221,7 @@ class GDBRunner {
         }
         this.startGDB();
       }
+      this.loadElf();
       this.slashFound = true;
     }
     if (!this.ready) {
