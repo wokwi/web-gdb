@@ -1,10 +1,10 @@
-# web-gdb-multiarch
+# Web GDB
 
-gdb-multiarch running in a web-browser!
+GDB (multiarch) running in a web-browser!
 
 ## How can I use it?
 
-To use web-gdb-multiarch on Wokwi, open any project (e.g. this [Simon game](https://wokwi.com/arduino/libraries/demo/simon-game)),
+To use Web GDB on Wokwi, open any project (e.g. this [Simon game](https://wokwi.com/arduino/libraries/demo/simon-game)),
 click on the code editor, and press F1. In the prompt that opens, type "GDB":
 
 ![](https://blog.wokwi.com/content/images/2021/02/image-8.png)
