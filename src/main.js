@@ -1,4 +1,4 @@
-const worker = new Worker('src/worker.js?v=5');
+const worker = new Worker('src/worker.js' + location.search);
 
 const term = new Terminal({
   cursorBlink: true,

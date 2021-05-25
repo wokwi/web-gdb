@@ -1,4 +1,6 @@
-const imageName = 'gdb-multiarch-10.1-bzImage.bin';
+const selfUrl = new URL(location.href);
+const arch = selfUrl.searchParams.get('arch') === 'avr' ? 'avr' : 'multiarch';
+const imageName = `gdb-${arch}-10.1-bzImage.bin`;
 
 importScripts('../build/libv86.js');
 
