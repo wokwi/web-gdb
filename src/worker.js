@@ -1,10 +1,13 @@
 const selfUrl = new URL(location.href);
 const arch = selfUrl.searchParams.get('arch') === 'avr' ? 'avr' : 'multiarch';
-const imageName = `gdb-${arch}-10.1-bzImage.bin`;
+const python = selfUrl.searchParams.get('python') === '1';
+const suffix = python ? `-python` : '';
+const imageName = `gdb-${arch}-10.1${suffix}-bzImage.bin`;
 
 importScripts('../build/libv86.js?v=2');
 
 console.log('Worker starting...');
+console.log(`Loading system from ${imageName}`);
 
 const gdb_sh = `
 #!/bin/sh
@@ -89,6 +92,8 @@ class GDBRunner {
       cmdline: 'tsc=reliable mitigations=off random.trust_cpu=on',
       autostart: false,
       disable_speaker: true,
+      memory_size: (python ? 96 : 64) * 1024 * 1024,
+      vga_memory_size: 2 * 1024 * 1024,
       filesystem: {},
       uart1: true,
     };
