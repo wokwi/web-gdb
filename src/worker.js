@@ -2,7 +2,7 @@ const selfUrl = new URL(location.href);
 const arch = selfUrl.searchParams.get('arch') === 'avr' ? 'avr' : 'multiarch';
 const imageName = `gdb-${arch}-10.1-bzImage.bin`;
 
-importScripts('../build/libv86.js');
+importScripts('../build/libv86.js?v=2');
 
 console.log('Worker starting...');
 
@@ -108,7 +108,7 @@ class GDBRunner {
 
   async init() {
     const { settings } = this;
-    this.cache = typeof caches !== 'undefined' ? await caches.open('gdb-state-v2') : null;
+    this.cache = typeof caches !== 'undefined' ? await caches.open('gdb-state-v3') : null;
     this.cachedData = this.cache ? await this.cache.match(imageName) : null;
     if (this.cachedData) {
       this.reportProgress('✅  System loaded from cache');
@@ -175,12 +175,14 @@ class GDBRunner {
       return;
     }
     this.cacheSaved = true;
-    await this.cache.put(
-      imageName,
-      new Response(frozenState, {
-        headers: { 'Content-type': 'application/binary' },
-      })
-    );
+    this.cache
+      .put(
+        imageName,
+        new Response(frozenState, {
+          headers: { 'Content-type': 'application/binary' },
+        })
+      )
+      .catch(console.error);
     console.log('emulator: state saved to cache.');
   }
 
@@ -192,6 +194,7 @@ class GDBRunner {
       this.ready = true;
       setTimeout(() => {
         this.loadElf();
+        this.startGDB();
       }, 0);
     } else {
       this.reportProgress(
@@ -207,14 +210,14 @@ class GDBRunner {
     this.gdbServer.requestElf();
   };
 
-  onSerial0Output = (chr) => {
+  onSerial0Output = async (chr) => {
     if (!this.bootMessageDisplayed) {
       this.reportProgress('✅  System booting...');
       this.bootMessageDisplayed = true;
     }
     if (chr === '/' && !this.ready) {
       if (this.slashFound) {
-        this.cacheState();
+        await this.cacheState();
         this.ready = true;
         for (const char of '\r\n') {
           self.postMessage({ type: 'serial', data: char });
