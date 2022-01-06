@@ -1,8 +1,9 @@
 const selfUrl = new URL(location.href);
 const arch = selfUrl.searchParams.get('arch') === 'avr' ? 'avr' : 'multiarch';
 const python = selfUrl.searchParams.get('python') === '1';
+const version = (python || arch == 'avr') ? '10.1' : '10.2'
 const suffix = python ? `-python` : '';
-const imageName = `gdb-${arch}-10.1${suffix}-bzImage.bin`;
+const imageName = `gdb-${arch}-${version}${suffix}-bzImage.bin`;
 
 importScripts('../build/libv86.js?v=2');
 
